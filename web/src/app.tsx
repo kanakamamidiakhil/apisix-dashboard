@@ -24,7 +24,7 @@ import { history } from 'umi';
 
 import Footer from '@/components/Footer';
 import RightContent from '@/components/RightContent';
-import { errorHandler, getMenuData, getUrlQuery } from '@/helpers';
+import { errorHandler, getMenuData } from '@/helpers';
 import { queryCurrent } from '@/services/user';
 
 import defaultSettings from '../config/defaultSettings';
@@ -33,12 +33,7 @@ export async function getInitialState(): Promise<{
   currentUser?: API.CurrentUser;
   settings?: LayoutSettings;
 }> {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    const redirect = getUrlQuery('redirect') || '/';
-    history.replace(`/user/login?redirect=${redirect}`);
-  }
-
+  
   const currentUser = await queryCurrent();
   return {
     currentUser,

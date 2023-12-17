@@ -38,21 +38,18 @@ func (token *Token) Token() (*oauth2.Token, error) {
 
 func Oidc() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.Request.URL.Path == "/apisix/admin/oidc/login" {
-			url := conf.OidcConfig.AuthCodeURL(conf.State)
-			c.Redirect(302, url)
+		if isOidcEnabled { // Replace with actual logic to check OIDC enabled state
+		  if !isUserAuthenticated(c) { // Replace with your actual auth check
+			c.Redirect(http.StatusSeeOther, "/apisix/admin/oidc/login")
 			c.Abort()
 			return
-		}
-
-		if c.Request.URL.Path == "/apisix/admin/oidc/callback" {
-			state := c.Query("state")
-			if state != conf.State {
-				log.Warn("the state does not match")
-				c.AbortWithStatus(http.StatusForbidden)
-				return
-			}
-
+		  }
+		} else if c.Request.URL.Path != "/apisix/admin/oidc/callback" {
+			// After successful OIDC auth, redirect to dashboard root if not on callback path
+			c.Redirect(http.StatusSeeOther, "/dashboard")
+			c.Abort()
+			return
+		
 			// in exchange for token
 			oauth2Token, err := conf.OidcConfig.Exchange(c, c.Query("code"))
 			if err != nil {
